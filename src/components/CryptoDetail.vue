@@ -59,7 +59,7 @@ import { Crypto } from "../../types/Crypto";
 import Button from "primevue/button";
 
 const props = defineProps<{
-  testData: Crypto;
+  testData?: Crypto;
 }>();
 
 const crypto = ref<Crypto | null>(null);

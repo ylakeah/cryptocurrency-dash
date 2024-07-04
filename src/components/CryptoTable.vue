@@ -110,7 +110,7 @@ import { Crypto } from "../../types/crypto";
 import type { log } from "console";
 import { icons } from "@phantasweng/vue-cryptocurrency-icons";
 defineProps<{
-  testData: [Crypto];
+  testData?: [Crypto];
 }>();
 
 const cryptos = ref<Crypto[]>([]);
