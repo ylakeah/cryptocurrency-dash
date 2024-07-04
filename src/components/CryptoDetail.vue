@@ -30,9 +30,12 @@
             </li>
             <li>
               <strong>Website:</strong>
-              <a :href="crypto?.explorer" target="_blank">{{
-                crypto?.explorer
-              }}</a>
+              <a
+                :href="crypto?.explorer"
+                target="_blank"
+                style="word-break: break-all"
+                >{{ crypto?.explorer }}</a
+              >
             </li>
           </ul>
         </div>
@@ -135,5 +138,11 @@ onMounted(() => {
   width: 100vw;
   display: flex;
   justify-content: center;
+}
+
+@media screen and (max-width: 600px) {
+  .center {
+    display: ruby;
+  }
 }
 </style>

@@ -138,7 +138,6 @@ const iconExists = (symbol: string) => {
 const search = (event: any) => {
   setTimeout(() => {
     if (!event.query.trim().length) {
-      // filteredCrypto.value = [...cryptolist];
       filteredCrypto.value = icons;
     } else {
       filteredCrypto.value = icons.filter((crypto: any) => {
