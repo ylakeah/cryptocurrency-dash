@@ -49,6 +49,8 @@
               :name="slotProps.data.symbol"
               style="height: 30px; width: 30px"
             />
+            <iconGenericCrypto v-else />
+            <!-- <div v-else>ini</div> -->
           </template>
         </Column>
         <Column field="name" sortable header="Name">
@@ -108,6 +110,7 @@ import AutoComplete from "primevue/autocomplete";
 import "primeicons/primeicons.css";
 import { Crypto } from "../../types/crypto";
 import type { log } from "console";
+import iconGenericCrypto from "./icons/IconCrypto.vue";
 import { icons } from "@phantasweng/vue-cryptocurrency-icons";
 defineProps<{
   testData?: [Crypto];
