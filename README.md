@@ -9,6 +9,7 @@ This is a cryptocurrency dashboard web application built with Vue.js, TypeScript
 - **Sorting**: Enables sorting by symbol or name.
 - **Favorites**: Allows users to add/remove cryptocurrencies from a favorites list, which is stored in local storage.
 - **Details Page**: Provides detailed information about each cryptocurrency.
+- **Search crypto**: Allows user to search cryptocurrency by name, user will be promt with autocomplete suggestion as well.
 
 
 ## Project Setup
@@ -27,6 +28,12 @@ npm run dev
 
 ```sh
 npm run build
+```
+
+### Unit test
+
+```sh
+npm run test:unit
 ```
 
 ## Usage
