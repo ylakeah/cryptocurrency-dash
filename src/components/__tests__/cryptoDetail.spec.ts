@@ -36,8 +36,7 @@ describe("CrytoDetail", async () => {
 
     // const price = wrapper.find('Price (USD)').text();
     // const marketCap = wrapper.find('li:contains("Market Cap (USD):")').text();
-
-    // expect(price).toContain('$62,852.31'); // Adjust based on your formatCurrency function
+    // expect(price).toContain('$62,852.31');
     // expect(marketCap).toContain('$1.17T');
   });
 

@@ -44,6 +44,8 @@
         <Column field="symbol" sortable header="Symbol">
           <template #body="slotProps">
             <vue-cryptocurrency-icons
+              v-if="iconExists(slotProps.data.symbol)"
+              type="png"
               :name="slotProps.data.symbol"
               style="height: 30px; width: 30px"
             />
@@ -104,10 +106,9 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import AutoComplete from "primevue/autocomplete";
 import "primeicons/primeicons.css";
-import cryptoSuggestion from "../utils/cryptoSuggestion.json";
 import { Crypto } from "../../types/crypto";
 import type { log } from "console";
-
+import { icons } from "@phantasweng/vue-cryptocurrency-icons";
 defineProps<{
   testData: [Crypto];
 }>();
@@ -121,15 +122,23 @@ const limit = 10;
 const offsetLocal = ref(0);
 const router = useRouter();
 const searchQuery = ref();
-const cryptolist = cryptoSuggestion;
 const filteredCrypto = ref();
 
+const iconExists = (symbol: string) => {
+  try {
+    const icon = icons.find((e: any) => e.symbol == symbol);
+    return icon.symbol;
+  } catch {
+    return false;
+  }
+};
 const search = (event: any) => {
   setTimeout(() => {
     if (!event.query.trim().length) {
-      filteredCrypto.value = [...cryptolist];
+      // filteredCrypto.value = [...cryptolist];
+      filteredCrypto.value = icons;
     } else {
-      filteredCrypto.value = cryptolist.filter((crypto: any) => {
+      filteredCrypto.value = icons.filter((crypto: any) => {
         return crypto.name.toLowerCase().startsWith(event.query.toLowerCase());
       });
     }
@@ -143,15 +152,13 @@ const fetchData = async (command: boolean) => {
 
     if (searchQuery.value?.name || searchQuery.value) {
       let name = searchQuery.value?.name || searchQuery.value;
-      response = await axios.get(
-        `https://api.coincap.io/v2/assets/${name.toLowerCase()}`,
-        {
-          params: {
-            limit,
-            offset: command ? (currentPage.value - 1) * 10 : offsetLocal.value,
-          },
-        }
-      );
+      name = name.replace(/\s+/g, "-").toLowerCase();
+      response = await axios.get(`https://api.coincap.io/v2/assets/${name}`, {
+        params: {
+          limit,
+          offset: command ? (currentPage.value - 1) * 10 : offsetLocal.value,
+        },
+      });
     } else {
       response = await axios.get(`https://api.coincap.io/v2/assets/`, {
         params: {
@@ -163,7 +170,6 @@ const fetchData = async (command: boolean) => {
 
     if (response.data.data.id) {
       let item = response.data.data;
-      console.log("here");
 
       cryptos.value = [
         {
