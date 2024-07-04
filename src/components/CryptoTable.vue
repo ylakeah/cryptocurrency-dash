@@ -247,7 +247,8 @@ const changePage = (val: number) => {
 onMounted(() => {
   loadLocalStorage();
   fetchData(false);
-  // setInterval(fetchData, 10000);
+  // fetch every 10 seconds
+  setInterval(fetchData, 10000); 
 });
 </script>
 
