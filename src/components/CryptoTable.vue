@@ -99,7 +99,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref, onMounted, computed } from "vue";
+import { ref, onMounted } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import { formatCurrency } from "../utils/helper";
@@ -109,7 +109,6 @@ import Column from "primevue/column";
 import AutoComplete from "primevue/autocomplete";
 import "primeicons/primeicons.css";
 import { Crypto } from "../../types/crypto";
-import type { log } from "console";
 import iconGenericCrypto from "./icons/IconCrypto.vue";
 import { icons } from "@phantasweng/vue-cryptocurrency-icons";
 defineProps<{

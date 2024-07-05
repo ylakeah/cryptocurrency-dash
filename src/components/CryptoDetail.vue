@@ -54,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import axios from "axios";
 import { useRouter, useRoute } from "vue-router";
 import { formatCurrency } from "../utils/helper";

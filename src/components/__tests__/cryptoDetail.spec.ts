@@ -20,7 +20,7 @@ describe("CrytoDetail", async () => {
   await wrapper.vm.$nextTick();
 
   wrapper.vm.crypto = mockCrypto;
-  console.log(wrapper.html());
+  // console.log(wrapper.html());
 
   it("renders properly", async () => {
     expect(wrapper.exists()).toBe(true);
@@ -33,11 +33,6 @@ describe("CrytoDetail", async () => {
     expect(wrapper.html()).toContain('Market Cap (USD):');
     expect(wrapper.html()).toContain('Website:');
     expect(wrapper.html()).toContain(mockCrypto.explorer);
-
-    // const price = wrapper.find('Price (USD)').text();
-    // const marketCap = wrapper.find('li:contains("Market Cap (USD):")').text();
-    // expect(price).toContain('$62,852.31');
-    // expect(marketCap).toContain('$1.17T');
   });
 
   // it("formats the price and market cap correctly", () => {
