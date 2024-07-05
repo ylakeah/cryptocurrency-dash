@@ -2,6 +2,9 @@
 
 This is a cryptocurrency dashboard web application built with Vue.js, TypeScript and vuetify. It displays near real-time cryptocurrency data from CoinCap, allows users to add cryptocurrencies to a favorites list, and provides detailed information about each cryptocurrency.
 
+## Preview
+<img width="900" alt="Screenshot 2024-07-05 at 02 46 48" src="https://github.com/ylakeah/cryptocurrency-dash/assets/114346410/52034065-d180-4bcc-88d2-9c5323fc9945">
+
 ## Features
 
 - **Real-Time Data**: Fetches and displays real-time cryptocurrency prices from the CoinCap API.
