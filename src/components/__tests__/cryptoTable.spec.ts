@@ -44,4 +44,6 @@ describe("CrytoTable", async () => {
   it("formats the price and market cap correctly", () => {
     expect(formatCurrency(mockCryptos[0].priceUsd)).toBe('$62,852.31');
   });
+
+  
 });

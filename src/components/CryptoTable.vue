@@ -6,13 +6,13 @@
     <div class="card flex justify-center" style="margin: 20px 0 20px 0">
       <AutoComplete
         placeholder="Search Crypto"
-        v-model="searchQuery"
+        v-model="cryptoStore.searchQuery"
         optionLabel="name"
-        :suggestions="filteredCrypto"
-        @complete="search"
-        @option-select="fetchData(true)"
-        v-on:keyup.enter="fetchData(true)"
-        @clear="fetchData(true)"
+        :suggestions="cryptoStore.filteredCrypto"
+        @complete="cryptoStore.search"
+        @option-select="cryptoStore.fetchOneData"
+        v-on:keyup.enter="cryptoStore.fetchOneData"
+        @clear="cryptoStore.fetchData(true)"
       >
         <template #option="slotProps">
           <div style="display: flex; align-items: center">
@@ -26,17 +26,16 @@
       </AutoComplete>
 
       <Button
-        v-if="searchQuery"
-        @click.prevent="(searchQuery = ''), fetchData(true)"
+        v-if="cryptoStore.searchQuery"
+        @click.prevent="(cryptoStore.searchQuery = ''), cryptoStore.fetchData(true)"
         style="margin-left: 10px"
-        >Clear</Button
-      >
+      >Clear</Button>
     </div>
     <div class="">
       <DataTable
-        :value="testData?.length > 1 ? testData : cryptos"
+        :value="testData?.length > 1 ? testData : cryptoStore.cryptos"
         size="normal"
-        :loading="loading"
+        :loading="cryptoStore.loading"
         class="p-datatable-sm"
       >
         <template #empty> No crypto found. </template>
@@ -50,7 +49,6 @@
               style="height: 30px; width: 30px"
             />
             <iconGenericCrypto v-else />
-            <!-- <div v-else>ini</div> -->
           </template>
         </Column>
         <Column field="name" sortable header="Name">
@@ -73,7 +71,7 @@
                 slotProps.data.favorite ? 'pi-star-fill' : 'pi-star',
               ]"
               @click="
-                toggleFavorite(slotProps.data),
+                cryptoStore.toggleFavorite(slotProps.data),
                   (slotProps.data.favorite = !slotProps.data.favorite)
               "
             ></i>
@@ -85,46 +83,46 @@
         <div class="footerIn">
           <Button
             label="Prev Page"
-            :disabled="currentPage === 1"
+            :disabled="cryptoStore.currentPage === 1"
             @click.prevent="changePage(-1)"
           />
           <div class="currentPage">
-            <span>{{ currentPage }}</span>
+            <span>{{ cryptoStore.currentPage }}</span>
           </div>
           <Button label="Next Page" @click.prevent="changePage(1)" />
         </div>
+        <!-- <div class="autoRefreshToggle">
+          <Button
+            :label="autoRefresh ? 'Stop Auto-Refresh' : 'Start Auto-Refresh'"
+            @click.prevent="toggleAutoRefresh"
+          />
+        </div> -->
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import axios from "axios";
-import { useRouter } from "vue-router";
-import { formatCurrency } from "../utils/helper";
-import Button from "primevue/button";
-import DataTable from "primevue/datatable";
-import Column from "primevue/column";
-import AutoComplete from "primevue/autocomplete";
-import "primeicons/primeicons.css";
-import { Crypto } from "../../types/crypto";
-import iconGenericCrypto from "./icons/IconCrypto.vue";
-import { icons } from "@phantasweng/vue-cryptocurrency-icons";
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import Button from 'primevue/button';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import AutoComplete from 'primevue/autocomplete';
+import 'primeicons/primeicons.css';
+import { Crypto } from '../../types/crypto';
+import iconGenericCrypto from './icons/IconCrypto.vue';
+import { icons } from '@phantasweng/vue-cryptocurrency-icons';
+import { useCryptoStore } from '../stores/cryptoStore';
+
 defineProps<{
   testData?: [Crypto];
 }>();
 
-const cryptos = ref<Crypto[]>([]);
-const favorites = ref(new Set<string>());
-const loading = ref(false);
-const currentPage = ref(1);
-const totalItems = ref(0);
-const limit = 10;
-const offsetLocal = ref(0);
+const cryptoStore = useCryptoStore();
 const router = useRouter();
-const searchQuery = ref();
-const filteredCrypto = ref();
+const autoRefresh = ref(false);
+let intervalId: ReturnType<typeof setInterval> | null = null;
 
 const iconExists = (symbol: string) => {
   try {
@@ -134,120 +132,33 @@ const iconExists = (symbol: string) => {
     return false;
   }
 };
-const search = (event: any) => {
-  setTimeout(() => {
-    if (!event.query.trim().length) {
-      filteredCrypto.value = icons;
-    } else {
-      filteredCrypto.value = icons.filter((crypto: any) => {
-        return crypto.name.toLowerCase().startsWith(event.query.toLowerCase());
-      });
-    }
-  }, 250);
-};
-
-const fetchData = async (command: boolean) => {
-  loading.value = true;
-  try {
-    let response: any = {};
-
-    if (searchQuery.value?.name || searchQuery.value) {
-      let name = searchQuery.value?.name || searchQuery.value;
-      name = name.replace(/\s+/g, "-").toLowerCase();
-      response = await axios.get(`https://api.coincap.io/v2/assets/${name}`, {
-        params: {
-          limit,
-          offset: command ? (currentPage.value - 1) * 10 : offsetLocal.value,
-        },
-      });
-    } else {
-      response = await axios.get(`https://api.coincap.io/v2/assets/`, {
-        params: {
-          limit,
-          offset: command ? (currentPage.value - 1) * 10 : offsetLocal.value,
-        },
-      });
-    }
-
-    if (response.data.data.id) {
-      let item = response.data.data;
-
-      cryptos.value = [
-        {
-          id: item.id,
-          symbol: item.symbol,
-          name: item.name,
-          priceUsd: formatCurrency(item.priceUsd),
-          marketCapUsd: formatCurrency(item.marketCapUsd),
-          favorite: favorites.value.has(item.id),
-        },
-      ];
-    } else {
-      cryptos.value = response.data.data.map((item: any) => ({
-        id: item.id,
-        symbol: item.symbol,
-        name: item.name,
-        priceUsd: formatCurrency(item.priceUsd),
-        marketCapUsd: formatCurrency(item.marketCapUsd),
-        favorite: favorites.value.has(item.id),
-      }));
-    }
-  } catch (error) {
-    console.error(error);
-    cryptos.value = [];
-  } finally {
-    localStorage.setItem(
-      "offset",
-      JSON.stringify((currentPage.value - 1) * 10)
-    );
-    loading.value = false;
-  }
-};
-
-const toggleFavorite = (item: Crypto) => {
-  if (favorites.value.has(item.id)) {
-    favorites.value.delete(item.id);
-  } else {
-    favorites.value.add(item.id);
-  }
-  saveFavorites();
-};
-
-const saveFavorites = () => {
-  localStorage.setItem(
-    "favorites",
-    JSON.stringify(Array.from(favorites.value))
-  );
-};
-
-const loadLocalStorage = () => {
-  const savedFavorites = localStorage.getItem("favorites");
-  const offsetData = Number(localStorage.getItem("offset"));
-
-  if (savedFavorites) {
-    favorites.value = new Set(JSON.parse(savedFavorites));
-  }
-
-  if (offsetData) {
-    offsetLocal.value = offsetData;
-    currentPage.value = offsetData / 10 + 1;
-  }
-};
 
 const goToDetails = (id: string) => {
   router.push(`details/${id}`);
 };
 
 const changePage = (val: number) => {
-  currentPage.value += val;
-  (searchQuery.value = ""), fetchData(true);
+  cryptoStore.currentPage += val;
+  (cryptoStore.searchQuery = ''), cryptoStore.fetchData(true);
+};
+
+const toggleAutoRefresh = () => {
+  autoRefresh.value = !autoRefresh.value;
+  if (autoRefresh.value) {
+    intervalId = setInterval(() => cryptoStore.fetchData(false), 10000);
+  } else if (intervalId) {
+    clearInterval(intervalId);
+    intervalId = null;
+  }
 };
 
 onMounted(() => {
-  loadLocalStorage();
-  fetchData(false);
-  // fetch every 10 seconds
-  setInterval(fetchData, 10000); 
+  cryptoStore.loadLocalStorage();
+  cryptoStore.fetchData(false);
+  // fetch every 10 seconds if auto-refresh is enabled
+  if (autoRefresh.value) {
+    intervalId = setInterval(() => cryptoStore.fetchData(false), 10000);
+  }
 });
 </script>
 

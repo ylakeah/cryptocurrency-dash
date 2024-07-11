@@ -8,33 +8,33 @@
           @click.prevent="goBack"
         ></Button>
       </div>
-      <div class="center">
+      <div class="center" v-if="!cryptoStore.loading">
         <div class="p-card-subtitle p-text-center">
           <vue-cryptocurrency-icons
-            :name="crypto?.symbol"
+            :name="cryptoStore.cryptos[0]?.symbol"
             style="height: 60px; width: 60px"
           />
           <br />
-          {{ crypto?.name }}
+          {{ cryptoStore.cryptos[0]?.name }}
         </div>
         <div class="p-card-content">
           <ul class="p-list p-list-none">
-            <li><strong>Rank:</strong> {{ crypto?.rank }}</li>
+            <li><strong>Rank:</strong> {{ cryptoStore.cryptos[0]?.rank }}</li>
             <li>
               <strong>Price (USD):</strong>
-              {{ formatCurrency(crypto?.priceUsd) }}
+              {{ cryptoStore.cryptos[0]?.priceUsd }}
             </li>
             <li>
               <strong>Market Cap (USD):</strong>
-              {{ formatCurrency(crypto?.marketCapUsd) }}
+              {{ cryptoStore.cryptos[0]?.marketCapUsd }}
             </li>
             <li>
               <strong>Website:</strong>
               <a
-                :href="crypto?.explorer"
+                :href="cryptoStore.cryptos[0]?.explorer"
                 target="_blank"
                 style="word-break: break-all"
-                >{{ crypto?.explorer }}</a
+                >{{ cryptoStore.cryptos[0]?.explorer }}</a
               >
             </li>
           </ul>
@@ -42,10 +42,14 @@
         <i
           :class="[
             'pi',
-            favorites?.has(crypto?.id) ? 'pi-star-fill' : 'pi-star',
+            favorites?.has(cryptoStore.cryptos[0]?.id)
+              ? 'pi-star-fill'
+              : 'pi-star',
           ]"
           @click.prevent="
-            toggleFavorite(crypto), (crypto.favorite = !crypto.favorite)
+            cryptoStore.toggleFavorite(cryptoStore.cryptos[0]),
+              (cryptoStore.cryptos[0].favorite =
+                !cryptoStore.cryptos[0].favorite)
           "
         ></i>
       </div>
@@ -55,69 +59,31 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import axios from "axios";
 import { useRouter, useRoute } from "vue-router";
-import { formatCurrency } from "../utils/helper";
 import { Crypto } from "../../types/Crypto";
 import Button from "primevue/button";
+import { useCryptoStore } from "../stores/cryptoStore";
 
 const props = defineProps<{
   testData?: Crypto;
 }>();
 
-const crypto = ref<Crypto | null>(null);
-const loading = ref(false);
+const cryptoStore = useCryptoStore();
 const router = useRouter();
 const route = useRoute();
 const favorites = ref(new Set<string>());
 
-const fetchDetails = async () => {
-  loading.value = true;
-  try {
-    const id = route.params.id as string;
-    const response = await axios.get(`https://api.coincap.io/v2/assets/${id}`);
-    crypto.value = response.data.data;
-  } catch (error) {
-    console.error(error);
-  } finally {
-    loading.value = false;
-  }
-};
-
 const goBack = () => {
   router.back();
-};
-
-const loadFavorites = () => {
-  const savedFavorites = localStorage.getItem("favorites");
-
-  if (savedFavorites) {
-    favorites.value = new Set(JSON.parse(savedFavorites));
-  }
-};
-
-const toggleFavorite = (item: Crypto) => {
-  if (favorites.value.has(item.id)) {
-    favorites.value.delete(item.id);
-  } else {
-    favorites.value.add(item.id);
-  }
-  saveFavorites();
-};
-
-const saveFavorites = () => {
-  localStorage.setItem(
-    "favorites",
-    JSON.stringify(Array.from(favorites.value))
-  );
+  cryptoStore.searchQuery = {};
 };
 
 onMounted(() => {
   if (props?.testData?.length > 0) {
-    crypto.value = props.testData;
+    cryptoStore.cryptos.values = props.testData;
   }
-  fetchDetails();
-  loadFavorites();
+  const id = route.params.id as string;
+  cryptoStore.fetchOneData(id);
 });
 </script>
 
